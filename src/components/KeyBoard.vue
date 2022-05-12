@@ -32,10 +32,10 @@ export default {
     watch: {
         paint() {
             this.paint.keys.forEach((letter, index) => {
-                this.$refs[letter.toUpperCase()][0].style.background = this.paint.colors[index];
+                this.$refs[letter][0].style.background = this.paint.colors[index];
 
                 if (this.paint.colors[index] == '#594B4F') {
-                    this.$refs[letter.toUpperCase()][0].style.color = '#6E5C62'
+                    this.$refs[letter][0].style.color = '#6E5C62'
                 }
             })
         }

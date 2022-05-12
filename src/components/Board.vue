@@ -24,7 +24,8 @@ export default {
       column: 1,
       row: 0,
       word: '',
-      correct: 0
+      correct: 0,
+      colors: []
     }
   },
   computed: {
@@ -35,7 +36,6 @@ export default {
       return this.correct == 5;
     },
     endLost() {
-      console.log(this.correct)
       return this.row >= 6 && this.correct != 5;
     }
   },
@@ -43,7 +43,6 @@ export default {
     window.addEventListener('keydown', this.typing)
     const position = Math.floor(Math.random() * 1465)
     this.word = this.wordsList[position]
-    console.log(this.word)
   },
   methods: {
     typing(keyboard) {
@@ -75,32 +74,130 @@ export default {
       if (keyboard.key == 'Enter') {
         if (this.value.length === 5) {
           if (validguest.join('').includes(this.value.join(''))) {
-            const word = this.word.split('');
+            const map = {}
 
-            for(let i=0; i<5; i++) {
-              if (this.value[i] == word[i]) {
-                this.$refs[i+1][this.row].style.background = '#3aa394'
-                this.correct++;
-              } else if(this.word.includes(this.value[i])) {
-                this.$refs[i+1][this.row].style.background = '#d3ad69'
+            this.word.split('').forEach((w, index) => {
+              if (map[w]) {
+                map[w].push(index)
               } else {
-                this.$refs[i+1][this.row].style.background = '#312a2c'
+                map[w] = []
+                map[w].push(index)
               }
+            })
 
-              this.value.splice(i, 1)
+            for(let [key, values] of Object.entries(map)) {
+              values.forEach(position => {
+                let letter = this.value[position]
+
+                if (letter == key) {
+                  this.tint(position, '#3aa394')
+                  this.correct++;
+                } else if (this.word.includes(key)) {
+                  let index = this.value.findIndex(v => v == key)
+                  if (index != -1) {
+                    this.tint(index, '#d3ad69')
+                  }
+                }
+              })
             }
+
+            for(let i=1; i<=5; i++) {
+              if (this.$refs[i][this.row].style.background == '') {
+                  this.$refs[i][this.row].style.background = '#312a2c'
+                  this.colors.push('#594B4F')
+              } else {
+                this.colors.push(this.$refs[i][this.row].style.background)
+              }
+            }
+
+
+
+            this.$emit('actionBoard', { colors: this.colors, keys: this.value})
 
             this.row++;
             this.column = 1;
             this.value = [];
+            this.colors = [];
 
             if (this.correct < 5) {
               this.correct = 0;
             }
+
+           /*  for(let i=0; i<this.value.length; i++) {
+              let key = this.value[i]
+              if (map[key]) {
+                map[key].forEach((m) => {
+                  let index = this.value.findIndex(v => v == key)
+                  if (index == m) {
+                    this.tint(index, '#3aa394')
+                    this.value[index] = ' '
+                  } else {
+                    this.tint(index, '#d3ad69')
+                    this.value[index] = ' '
+                  }
+                })
+              } else {
+                this.tint(i, '#312a2c')
+              }
+            } */
+
+            /* for(let [key, value] of Object.entries(map)) {
+                for (let i=0; i<value.length; i++) {
+                   let index = this.word.split('').findIndex(w => w == key)
+                    if(this.word.includes() && index == value[i]) {
+                      this.tint(value[i], '#3aa394')
+                      this.word = this.word.replace(key, ' ')
+                    } else if (this.word.includes(key)) {
+                      this.tint(value[i], '#d3ad69')
+                      this.word = this.word.replace(key, ' ')
+                    } else {
+                      this.tint(value[i], '#312a2c')
+                    }
+                }
+            } */
+
+            /* const word = []
+            for(let i=0; i<5; i++) {
+              let index = word.findIndex(w => w == this.value[i])
+              if (index != -1 && word[index] == this.value[index]) {
+                this.$refs[index+1][this.row].style.background = '#3aa394'
+                this.$refs[i+1][this.row].style.background = '#312a2c'
+                this.colors.push('#3aa394')
+                word[index] = ''
+
+                if(this.$refs[i+1][this.row].style.background == ''){
+                  this.$refs[i+1][this.row].style.background = '#312a2c'
+                  this.colors.push('#594B4F')
+                  this.correct++;
+                } 
+              } else if(index != -1) {
+                this.$refs[i+1][this.row].style.background = '#d3ad69'
+                this.colors.push('#d3ad69')
+                word[index] = ''
+              } else if(this.$refs[i+1][this.row].style.background == ''){
+                this.$refs[i+1][this.row].style.background = '#312a2c'
+                this.colors.push('#594B4F')
+              }
+            }
+
+            this.$emit('actionBoard', { colors: this.colors, keys: this.value})
+
+            this.row++;
+            this.column = 1;
+            this.value = [];
+            this.colors = [];
+
+            if (this.correct < 5) {
+              this.correct = 0;
+            } */
           }
         }
       }
-    }
+    },
+
+    tint(index, color) {
+      this.$refs[index+1][this.row].style.background = color
+    },
   }
 }
 </script>
@@ -110,7 +207,7 @@ export default {
       text-align: center;
       font-family: Mitr,sans-serif;
       color: white;
-      font-size: 1.5rem;
+      font-size: 2rem;
     }
 
     .container-squad {

@@ -1,7 +1,7 @@
 <template>
   <div id="app">
-    <board @actionBoard="actionBoard"/>
-    <key-board :paint="paintLetters"/>
+    <board @actionBoard="actionBoard" :keypress="keypress" />
+    <key-board :paint="paintLetters" @tiping="tiping"/>
   </div>
 </template>
 
@@ -17,12 +17,17 @@ export default {
   },
   data() {
     return {
-      paintLetters: {}
+      paintLetters: {},
+      keypress: {}
     }
   },
   methods: {
     actionBoard(payload) {
       this.paintLetters = payload
+    },
+    tiping(payload) {
+      console.log(payload)
+      this.keypress = payload;
     }
   }
 }

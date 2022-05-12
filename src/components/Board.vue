@@ -37,12 +37,15 @@ export default {
     },
     endLost() {
       return this.row >= 6 && this.correct != 5;
-    }
+    },
   },
   mounted() {
     window.addEventListener('keydown', this.typing)
     const position = Math.floor(Math.random() * 1465)
     this.word = this.wordsList[position]
+  },
+  props: {
+    keypress: Object
   },
   methods: {
     typing(keyboard) {
@@ -198,6 +201,15 @@ export default {
     tint(index, color) {
       this.$refs[index+1][this.row].style.background = color
     },
+  },
+  watch: {
+    'keypress.random'() {
+      let key = this.keypress.key
+      if (key == '<==') {
+        key = 'Backspace'
+      }
+      this.typing({ key })
+    }
   }
 }
 </script>

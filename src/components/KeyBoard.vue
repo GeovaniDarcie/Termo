@@ -1,17 +1,17 @@
 <template>
   <div>
       <div class="key-board">
-          <button v-for="key in keysLine1" :key="key" :ref="key" class="key">
+          <button @click="$emit('tiping', { key, random: Math.random() * 1000 } )" v-for="key in keysLine1" :key="key" :ref="key" class="key">
               {{ key }}
           </button>
       </div>
       <div class="key-board">
-          <button v-for="key in keysLine2" :key="key" :ref="key" class="key">
+          <button @click="$emit('tiping', { key, random: Math.random() * 1000 })" v-for="key in keysLine2" :key="key" :ref="key" class="key">
               {{ key }}
           </button>
       </div>
       <div class="key-board">
-          <button v-for="key in keysLine3" :key="key" :ref="key" class="key">
+          <button @click="$emit('tiping', { key, random: Math.random() * 1000 })" v-for="key in keysLine3" :key="key" :ref="key" :class="{ enter: key == 'Enter', key: key != 'Enter'}">
               {{ key }}
           </button>
       </div>
@@ -23,15 +23,14 @@ export default {
     name: "KeyBoard",
     data() {
         return {
-            keysLine1: ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
-            keysLine2: ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
-            keysLine3: ['Z', 'X', 'C', 'V', 'B', 'N', 'M']
+            keysLine1: ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
+            keysLine2: ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', '<=='],
+            keysLine3: ['z', 'x', 'c', 'v', 'b', 'n', 'm', 'Enter']
         }
     },
     props: ['paint'],
     watch: {
         paint() {
-            console.log(this.paint)
             this.paint.keys.forEach((letter, index) => {
                 this.$refs[letter.toUpperCase()][0].style.background = this.paint.colors[index];
 
@@ -55,6 +54,18 @@ export default {
     .key {
         height: 44px;
         width: 47px;
+        background-color: #4C4347;
+        border: none;
+        margin: 3px;
+        color: white;
+        font-family: 'Mitr', sans-serif;
+        cursor: pointer;
+        text-transform: uppercase;
+    }
+
+    .enter {
+        height: 44px;
+        width: 60px;
         background-color: #4C4347;
         border: none;
         margin: 3px;

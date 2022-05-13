@@ -7,12 +7,14 @@
       </div>
       <h3 v-show="endSucess">Você venceu!</h3>
       <h3 v-show="endLost">Você perdeu! =( </h3>
+      <h3 v-show="endLost">A palavra era <span class="corret"> {{ word.toUpperCase() }} </span> </h3>
   </div>
 </template>
 
 <script>
 import words from '../constants/wordlist.js';
 import validguest from '../constants/validguest.js'
+import 'animate.css';
 
 export default {
   name: 'board',
@@ -25,7 +27,7 @@ export default {
       row: 0,
       word: '',
       correct: 0,
-      colors: []
+      colors: [],
     }
   },
   computed: {
@@ -43,6 +45,7 @@ export default {
     window.addEventListener('keydown', this.typing)
     const position = Math.floor(Math.random() * 1465)
     this.word = this.wordsList[position]
+    this.word = this.word.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
   },
   props: {
     keypress: Object
@@ -104,7 +107,10 @@ export default {
               })
             }
 
+
+
             for(let i=1; i<=5; i++) {
+              this.$refs[i][this.row].classList.add('shake')
               if (this.$refs[i][this.row].style.background == '') {
                   this.$refs[i][this.row].style.background = '#312a2c'
                   this.colors.push('#594B4F')
@@ -113,8 +119,6 @@ export default {
               }
             }
 
-
-
             this.$emit('actionBoard', { colors: this.colors, keys: this.value})
 
             this.row++;
@@ -125,74 +129,17 @@ export default {
             if (this.correct < 5) {
               this.correct = 0;
             }
-
-           /*  for(let i=0; i<this.value.length; i++) {
-              let key = this.value[i]
-              if (map[key]) {
-                map[key].forEach((m) => {
-                  let index = this.value.findIndex(v => v == key)
-                  if (index == m) {
-                    this.tint(index, '#3aa394')
-                    this.value[index] = ' '
-                  } else {
-                    this.tint(index, '#d3ad69')
-                    this.value[index] = ' '
-                  }
-                })
-              } else {
-                this.tint(i, '#312a2c')
-              }
-            } */
-
-            /* for(let [key, value] of Object.entries(map)) {
-                for (let i=0; i<value.length; i++) {
-                   let index = this.word.split('').findIndex(w => w == key)
-                    if(this.word.includes() && index == value[i]) {
-                      this.tint(value[i], '#3aa394')
-                      this.word = this.word.replace(key, ' ')
-                    } else if (this.word.includes(key)) {
-                      this.tint(value[i], '#d3ad69')
-                      this.word = this.word.replace(key, ' ')
-                    } else {
-                      this.tint(value[i], '#312a2c')
-                    }
-                }
-            } */
-
-            /* const word = []
-            for(let i=0; i<5; i++) {
-              let index = word.findIndex(w => w == this.value[i])
-              if (index != -1 && word[index] == this.value[index]) {
-                this.$refs[index+1][this.row].style.background = '#3aa394'
-                this.$refs[i+1][this.row].style.background = '#312a2c'
-                this.colors.push('#3aa394')
-                word[index] = ''
-
-                if(this.$refs[i+1][this.row].style.background == ''){
-                  this.$refs[i+1][this.row].style.background = '#312a2c'
-                  this.colors.push('#594B4F')
-                  this.correct++;
-                } 
-              } else if(index != -1) {
-                this.$refs[i+1][this.row].style.background = '#d3ad69'
-                this.colors.push('#d3ad69')
-                word[index] = ''
-              } else if(this.$refs[i+1][this.row].style.background == ''){
-                this.$refs[i+1][this.row].style.background = '#312a2c'
-                this.colors.push('#594B4F')
+          } else {
+            alert("Palavra inválida!!")
+            for(let i=1; i<=5; i++) {
+              if (this.$refs[i][this.row].innerText != '') {
+                this.$refs[i][this.row].innerText = '';
               }
             }
 
-            this.$emit('actionBoard', { colors: this.colors, keys: this.value})
-
-            this.row++;
             this.column = 1;
             this.value = [];
             this.colors = [];
-
-            if (this.correct < 5) {
-              this.correct = 0;
-            } */
           }
         }
       }
@@ -253,4 +200,45 @@ export default {
       -moz-box-shadow: none;
       box-shadow: none;
     }
+
+    .corret {
+      color: DarkRed;
+    }
+
+    .shake {
+      animation: 0.45s linear flip 0s forwards;
+      animation-duration: 0.45s;
+      animation-timing-function: linear;
+      animation-delay: 0s;
+      animation-iteration-count: 1;
+      animation-direction: normal;
+      animation-fill-mode: forwards;
+      animation-play-state: running;
+      animation-name: flip;
+      transform: perspective(200px) rotateY(-90deg);
+    }
+
+    @keyframes flip{
+      0% {
+        border: 0.125em solid #4C4347;
+        transform: perspective(200px) rotateY(0deg);
+      }
+      50% {
+        border: 0.125em solid #4C4347;
+        transform: perspective(200px) rotateY(90deg);
+      }
+
+      50% {
+        transform: perspective(200px) rotateY(-90deg);
+      }
+
+      50% {
+        border: none;
+      }
+
+      100% {
+        transform: perspective(200px) rotateY(0deg);
+      }
+    } 
+
 </style>

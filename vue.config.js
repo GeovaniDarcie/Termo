@@ -1,3 +1,6 @@
 module.exports = {
-    publicPath: '/Termo'
+    publicPath: '/Termo',
+    configureWebpack: {
+        devtool: 'source-map'
+      }
 }

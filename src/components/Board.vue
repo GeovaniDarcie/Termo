@@ -45,6 +45,7 @@ export default {
     window.addEventListener('keydown', this.typing)
     const position = Math.floor(Math.random() * 1465)
     this.word = this.wordsList[position]
+    console.log(this.word)
     this.word = this.word.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
   },
   props: {
@@ -52,8 +53,115 @@ export default {
   },
   methods: {
     typing(keyboard) {
-      if ((/[a-zA-Z]/).test(keyboard.key) && keyboard.key.length == 1 && this.$refs[this.column]) {
-        if (this.$refs[this.column][this.row].innerText == '') {
+      if (!this.endSucess && !this.endLost) {
+        if ((/[a-zA-Z]/).test(keyboard.key) && keyboard.key.length == 1 && this.$refs[this.column]) {
+          this.letterPress(keyboard);
+        }
+  
+        if (keyboard.key == 'Backspace' && this.column >= 1 && this.row >= 0) {
+          this.backSpacePress();
+        }
+  
+        if (keyboard.key == 'Enter') {
+          if (this.value.length === 5) {
+            if (validguest.join('').includes(this.value.join(''))) {
+              const mapValues = {};
+              this.value.forEach((v, i) => {
+                if (mapValues[v]) {
+                   mapValues[v].letters.push(i)
+                } else {
+                  mapValues[v] = { letters: [], colors: [] }
+                  mapValues[v].letters.push(i)
+                }
+              })
+          
+              const map = {}
+  
+              this.word.split('').forEach((w, index) => {
+                if (map[w]) {
+                  map[w].push(index)
+                } else {
+                  map[w] = []
+                  map[w].push(index)
+                }
+              })
+  
+              for(let [key, values] of Object.entries(map)) {
+                values.forEach(position => {
+                  let letter = this.value[position]
+  
+                  if (letter == key) {
+                    this.tint(position, '#3aa394')
+                    this.value[position] = ''
+                    this.correct++;
+                  } else if (this.word.includes(key)) {
+                    let index = this.value.findIndex(v => v == key)
+                    if (index != -1) {
+                      this.tint(index, '#d3ad69')
+                    }
+                  }
+                })
+              }
+  
+              for(let i=1; i<=5; i++) {
+                this.$refs[i][this.row].classList.add('shake')
+                if (this.$refs[i][this.row].style.background == '') {
+                  this.$refs[i][this.row].style.background = '#312a2c'
+                
+                  this.colors.push('#594B4F')
+                } else {
+                  this.colors.push(this.$refs[i][this.row].style.background)
+                }
+              }
+  
+              for(let [, values] of Object.entries(mapValues)) {
+                values.letters.forEach(position => {
+                  values.colors.push(this.colors[position])
+                })
+              }
+  
+              const mapColors = {}
+              for(let [key, values] of Object.entries(mapValues)) {
+                const green = values.colors.filter(c => c == 'rgb(58, 163, 148)')
+                const yellow = values.colors.filter(c => c == 'rgb(211, 173, 105)')
+  
+                if (green.length > 0) {
+                  mapColors[key] = 'rgb(58, 163, 148)'
+                } else if (yellow.length > 0) {
+                  mapColors[key] = 'rgb(211, 173, 105)'
+                } else {
+                  mapColors[key] = '#594B4F'
+                }
+              }
+              this.$emit('actionBoard', mapColors)
+  
+              this.row++;
+              this.column = 1;
+              this.value = [];
+              this.colors = [];
+  
+              if (this.correct < 5) {
+                this.correct = 0;
+              }
+            } else {
+              alert("Palavra inválida!!")
+              for(let i=1; i<=5; i++) {
+                if (this.$refs[i][this.row].innerText != '') {
+                  this.$refs[i][this.row].innerText = '';
+                }
+              }
+  
+              this.column = 1;
+              this.value = [];
+              this.colors = [];
+            }
+          }
+        }
+      }
+    },
+
+    letterPress(keyboard) {
+      if (this.$refs[this.column][this.row].innerText == '') {
           this.$refs[this.column][this.row].innerText = keyboard.key;
           this.value.push(keyboard.key);
         } else {
@@ -65,83 +173,15 @@ export default {
             this.column = 5;
           }
         }
-      }
+    },
 
-      if (keyboard.key == 'Backspace' && this.column >= 1 && this.row >= 0) {
-        this.$refs[this.column][this.row].innerText = ''
-        this.value.pop();
-        this.column--;
+    backSpacePress() {
+      this.$refs[this.column][this.row].innerText = ''
+      this.value.pop();
+      this.column--;
 
-        if (this.column == 0) {
-          this.column = 1;
-        }
-      }
-
-      if (keyboard.key == 'Enter') {
-        if (this.value.length === 5) {
-          if (validguest.join('').includes(this.value.join(''))) {
-            const map = {}
-
-            this.word.split('').forEach((w, index) => {
-              if (map[w]) {
-                map[w].push(index)
-              } else {
-                map[w] = []
-                map[w].push(index)
-              }
-            })
-
-            for(let [key, values] of Object.entries(map)) {
-              values.forEach(position => {
-                let letter = this.value[position]
-
-                if (letter == key) {
-                  this.tint(position, '#3aa394')
-                  this.correct++;
-                } else if (this.word.includes(key)) {
-                  let index = this.value.findIndex(v => v == key)
-                  if (index != -1) {
-                    this.tint(index, '#d3ad69')
-                  }
-                }
-              })
-            }
-
-
-
-            for(let i=1; i<=5; i++) {
-              this.$refs[i][this.row].classList.add('shake')
-              if (this.$refs[i][this.row].style.background == '') {
-                  this.$refs[i][this.row].style.background = '#312a2c'
-                  this.colors.push('#594B4F')
-              } else {
-                this.colors.push(this.$refs[i][this.row].style.background)
-              }
-            }
-
-            this.$emit('actionBoard', { colors: this.colors, keys: this.value})
-
-            this.row++;
-            this.column = 1;
-            this.value = [];
-            this.colors = [];
-
-            if (this.correct < 5) {
-              this.correct = 0;
-            }
-          } else {
-            alert("Palavra inválida!!")
-            for(let i=1; i<=5; i++) {
-              if (this.$refs[i][this.row].innerText != '') {
-                this.$refs[i][this.row].innerText = '';
-              }
-            }
-
-            this.column = 1;
-            this.value = [];
-            this.colors = [];
-          }
-        }
+      if (this.column == 0) {
+        this.column = 1;
       }
     },
 
@@ -161,8 +201,15 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
     h3 {
+      text-align: center;
+      font-family: Mitr,sans-serif;
+      color: white;
+      font-size: 2rem;
+    }
+
+    button {
       text-align: center;
       font-family: Mitr,sans-serif;
       color: white;
@@ -206,8 +253,8 @@ export default {
     }
 
     .shake {
-      animation: 0.45s linear flip 0s forwards;
-      animation-duration: 0.45s;
+      animation: linear flip 0s forwards;
+      animation-duration: 2s;
       animation-timing-function: linear;
       animation-delay: 0s;
       animation-iteration-count: 1;
@@ -215,7 +262,7 @@ export default {
       animation-fill-mode: forwards;
       animation-play-state: running;
       animation-name: flip;
-      transform: perspective(200px) rotateY(-90deg);
+      transform: perspective(200px) rotateY(360deg);
     }
 
     @keyframes flip{
@@ -223,21 +270,22 @@ export default {
         border: 0.125em solid #4C4347;
         transform: perspective(200px) rotateY(0deg);
       }
-      50% {
-        border: 0.125em solid #4C4347;
+
+      25% {
         transform: perspective(200px) rotateY(90deg);
       }
-
       50% {
-        transform: perspective(200px) rotateY(-90deg);
+        border: 0.125em solid #4C4347;
+        transform: perspective(200px) rotateY(180deg);
       }
 
-      50% {
+      75% {
         border: none;
+        transform: perspective(200px) rotateY(270deg);
       }
 
       100% {
-        transform: perspective(200px) rotateY(0deg);
+        transform: perspective(200px) rotateY(360deg);
       }
     } 
 

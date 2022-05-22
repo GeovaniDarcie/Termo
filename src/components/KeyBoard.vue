@@ -31,13 +31,23 @@ export default {
     props: ['paint'],
     watch: {
         paint() {
-            this.paint.keys.forEach((letter, index) => {
-                this.$refs[letter][0].style.background = this.paint.colors[index];
-
-                if (this.paint.colors[index] == '#594B4F') {
-                    this.$refs[letter][0].style.color = '#6E5C62'
+            let green = 'rgb(58, 163, 148)';
+            let yellow = 'rgb(211, 173, 105)';
+            let black = '#594B4F';
+            for(let [key, value] of Object.entries(this.paint)) {
+                console.log(this.$refs[key][0].style.background)
+                if (this.$refs[key][0].style.background != green) {
+                    if (this.$refs[key][0].style.background == yellow && value == green) {
+                        this.$refs[key][0].style.background = value   
+                    } else {
+                        this.$refs[key][0].style.background = value
+        
+                        if (value == black) {
+                            this.$refs[key][0].style.color = '#6E5C62' 
+                        }
+                    }
                 }
-            })
+            }
         }
     }
 }
